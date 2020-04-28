@@ -1,25 +1,25 @@
 <script>
   import { onMount } from 'svelte';
   import lunr from 'lunr';
-  //import lunrfr from 'lunr-languages/lunr.fr';
+  import lunrstemmer from 'lunr-languages/lunr.stemmer.support';
+  import lunrfr from 'lunr-languages/lunr.fr';
+
+  lunrstemmer(lunr)
+  lunrfr(lunr)
+
   let data
 	let searchTerm = "";
   let results
   let filteredResults
   let lunrIdx
 
-//var lunr = require("lunr")
-//require("lunr-languages/lunr.stemmer.support")(lunr)
-//require("lunr-languages/lunr.fr")(lunr)
-
   onMount(async() => {
     const res = await fetch('faq-saisis.json')
-    console.log("fr", lunrfr);
     data = await res.json()
     console.log(data);
 
     lunrIdx = lunr(function () {
-      //this.use(lunrfr)
+      this.use(lunr.fr)
       this.ref('id')
       this.field('question')
       this.field('response')
@@ -30,7 +30,7 @@
       //  text: "Ceci n'est pas une pipe"
       //})
       data.forEach((doc, idx) => {
-        doc.id = idx + 1
+        doc.id = idx
         this.add(doc)
       }, this)
     })
