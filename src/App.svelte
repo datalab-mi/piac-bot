@@ -1,94 +1,35 @@
 <script>
-  //import { onMount } from 'svelte';
-  //import lunr from 'lunr';
-  //import lunrstemmer from 'lunr-languages/lunr.stemmer.support';
-  //import lunrfr from 'lunr-languages/lunr.fr';
+  import { loadData } from './tools/searchTools';
+	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
+  import lunr from 'lunr';
+  import lunrstemmer from 'lunr-languages/lunr.stemmer.support';
+  import lunrfr from 'lunr-languages/lunr.fr';
 
-  //lunrstemmer(lunr)
-  //lunrfr(lunr)
-
-  //let data
-	//let searchTerm = "";
-  //let results
-  //let filteredResults
-  //let lunrIdx
-
-  //const contractionRemover = function (builder) {
-
-  //  const RemoveApp = function (token) {
-  //    return token.replace(/(l')$/, "")
-  //  }
-
-  //  lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'contractionTrimmer')
-
-  //  var englishContractions = function (idx) {
-  //    //builder.pipeline.after(lunr.trimmer, lunr.contractionTrimmer)
-  //    builder.pipeline.before(this.pipeline._stack[0], lunr.contractionTrimmer)
-  //  }
-  //}
-
-  //onMount(async() => {
-  //  const res = await fetch('faq-saisis.json')
-  //  data = await res.json()
-  //  console.log(data);
-
-  //  lunrIdx = lunr(function () {
-  //    this.use(lunr.fr)
-  //    this.use(contractionRemover)
-  //    this.ref('id')
-  //    this.field('question')
-  //    this.field('response')
-  //    //this.field('responseGN')
-
-  //    data.forEach((doc, idx) => {
-  //      doc.id = idx
-  //      this.add(doc)
-  //    }, this)
-  //  })
-
-  //})
-
-  //const handleSearch = () => {
-  //  if (searchTerm) {
-  //    results = lunrIdx.search(searchTerm)
-  //    filteredResults = results.map(item => {
-  //      console.log(item);
-  //      return data[item.ref]
-  //    })
-  //  } else {
-  //    results = []
-  //  }
-  //}
-
-  //function updateSearch() {
-  //  if (searchTerm) {
-  //    results = data.filter(item => item.body.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1)
-  //    filteredResults = results.map(item => {
-  //      let positionArray = []
-  //      let position = item.body.toLowerCase().indexOf(searchTerm.toLowerCase())
-  //      while (position !== -1) {
-  //        positionArray.push(position)
-  //        position = item.body.toLowerCase().indexOf(searchTerm.toLowerCase(), position + 1)
-  //      }
-  //      item.positions = positionArray
-  //      return item
-  //    })
-  //  } else {
-  //    results = []
-  //  }
-  //}
-
-  //function getExtract(body, position) {
-  //  const len = 180
-  //  let min = (position - 180) < 0 ? 0 : (position - 180)
-  //  let max = (position + 180) > body.length ? body.length : (position + 180)
-  //  return body.substring(min, max)
-  //}
-	import Chatbot from './tools/chatbotEngine';
-	import { beforeUpdate, afterUpdate } from 'svelte';
+  lunrstemmer(lunr)
+  lunrfr(lunr)
 
 	let div;
+  let data;
 	let autoscroll;
+  let lunrIdx;
+
+
+  onMount(async () => {
+    data = await loadData()
+    lunrIdx = lunr(function () {
+      console.log(`loaded ${data.length}`);
+      this.use(lunr.fr)
+      this.ref('id')
+      this.field('question')
+      this.field('response')
+      //this.field('responseGN')
+
+      data.forEach((doc, idx) => {
+        doc.id = idx
+        this.add(doc)
+      }, this)
+    })
+  })
 
 	beforeUpdate(() => {
 		autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
@@ -98,43 +39,67 @@
 		if (autoscroll) div.scrollTo(0, div.scrollHeight)
 	});
 
-	const chatbot = new Chatbot();
-
 	let comments = [
-		{ auth: 'chatbot', text: chatbot.getInitial() }
+		{ auth: 'chatbot', text: 'hello' },
 	];
 
-	function handleSubmit(event) {
-		if (event.which === 13) {
-			event.preventDefault();
-			const text = event.target.value;
-			if (!text) return;
+  function handleSubmit(event) {
+    if (event.which === 13) {
+      event.preventDefault();
+      const text = event.target.value;
+      if (!text) return;
 
-			comments = comments.concat({
-				author: 'user',
-				text
-			});
+      comments = comments.concat({
+        author: 'user',
+        text
+      });
 
-			event.target.value = '';
+      event.target.value = '';
 
-			const reply = chatbot.transform(text);
+      const results = handleSearch(text)
+      console.log(data);
+      console.log(results);
 
-			setTimeout(() => {
-				comments = comments.concat({
-					author: 'otheruser',
-					text: '...',
-					placeholder: true
-				});
+      if (results.length > 0 ) {
+        handleAnswer(`J'ai trouvé les resultats suivants`)
+        results.forEach(result => {
+          setTimeout(() => { handleAnswer(result.response); }, 300)
+        })
+      } else {
+        handleAnswer(`Je n'ai pas trouvé de resultats`)
+      }
+    }
+  }
 
-				setTimeout(() => {
-					comments = comments.filter(comment => !comment.placeholder).concat({
-						author: 'otheruser',
-						text: reply
-					});
-				}, 500 + Math.random() * 500);
-			}, 200 + Math.random() * 200);
-		}
-	}
+  const handleSearch = (searchTerm) => {
+    if (searchTerm) {
+      const results = lunrIdx.search(searchTerm)
+      const filteredResults = results.map(item => {
+        return data[item.ref]
+      })
+      return filteredResults
+    } else {
+      return []
+    }
+  }
+
+  const handleAnswer = (reply) => {
+    setTimeout(() => {
+      comments = comments.concat({
+        author: 'otheruser',
+        text: '...',
+        placeholder: true
+      });
+
+      setTimeout(() => {
+        comments = comments.filter(comment => !comment.placeholder).concat({
+          author: 'otheruser',
+          text: reply
+        });
+      }, 500 + Math.random() * 500);
+    }, 200 + Math.random() * 200);
+  }
+
 </script>
 
 <style>
@@ -198,7 +163,7 @@
 </style>
 
 <div class="chat">
-	<h1 class="title">Talk to me baby</h1>
+	<h1 class="title">PIAC Bot</h1>
 
 	<div class="scrollable" bind:this={div}>
 		{#each comments as comment}
