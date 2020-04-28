@@ -13,6 +13,20 @@
   let filteredResults
   let lunrIdx
 
+  const contractionRemover = function (builder) {
+
+    const RemoveApp = function (token) {
+      return token.replace(/(l')$/, "")
+    }
+
+    lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'contractionTrimmer')
+
+    var englishContractions = function (idx) {
+      //builder.pipeline.after(lunr.trimmer, lunr.contractionTrimmer)
+      builder.pipeline.before(this.pipeline._stack[0], lunr.contractionTrimmer)
+    }
+  }
+
   onMount(async() => {
     const res = await fetch('faq-saisis.json')
     data = await res.json()
@@ -20,15 +34,12 @@
 
     lunrIdx = lunr(function () {
       this.use(lunr.fr)
+      this.use(contractionRemover)
       this.ref('id')
       this.field('question')
       this.field('response')
       //this.field('responseGN')
 
-      //this.add({
-      //  id: 1,
-      //  text: "Ceci n'est pas une pipe"
-      //})
       data.forEach((doc, idx) => {
         doc.id = idx
         this.add(doc)
@@ -43,14 +54,6 @@
       filteredResults = results.map(item => {
         console.log(item);
         return data[item.ref]
-        //let positionArray = []
-        //let position = item.body.toLowerCase().indexOf(searchTerm.toLowerCase())
-        //while (position !== -1) {
-        //  positionArray.push(position)
-        //  position = item.body.toLowerCase().indexOf(searchTerm.toLowerCase(), position + 1)
-        //}
-        //item.positions = positionArray
-        //return item
       })
     } else {
       results = []
