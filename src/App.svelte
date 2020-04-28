@@ -1,14 +1,61 @@
 <script>
   import { onMount } from 'svelte';
+  import lunr from 'lunr';
+  //import lunrfr from 'lunr-languages/lunr.fr';
   let data
 	let searchTerm = "";
   let results
   let filteredResults
+  let lunrIdx
+
+//var lunr = require("lunr")
+//require("lunr-languages/lunr.stemmer.support")(lunr)
+//require("lunr-languages/lunr.fr")(lunr)
 
   onMount(async() => {
-    const res = await fetch('data.json')
+    const res = await fetch('faq-saisis.json')
+    console.log("fr", lunrfr);
     data = await res.json()
+    console.log(data);
+
+    lunrIdx = lunr(function () {
+      //this.use(lunrfr)
+      this.ref('id')
+      this.field('question')
+      this.field('response')
+      //this.field('responseGN')
+
+      //this.add({
+      //  id: 1,
+      //  text: "Ceci n'est pas une pipe"
+      //})
+      data.forEach((doc, idx) => {
+        doc.id = idx + 1
+        this.add(doc)
+      }, this)
+    })
+
   })
+
+  const handleSearch = () => {
+    if (searchTerm) {
+      results = lunrIdx.search(searchTerm)
+      filteredResults = results.map(item => {
+        console.log(item);
+        return data[item.ref]
+        //let positionArray = []
+        //let position = item.body.toLowerCase().indexOf(searchTerm.toLowerCase())
+        //while (position !== -1) {
+        //  positionArray.push(position)
+        //  position = item.body.toLowerCase().indexOf(searchTerm.toLowerCase(), position + 1)
+        //}
+        //item.positions = positionArray
+        //return item
+      })
+    } else {
+      results = []
+    }
+  }
 
   function updateSearch() {
     if (searchTerm) {
@@ -38,15 +85,13 @@
 
 <main>
 	<h1>Moteur de recherche</h1>
-  <input class="input"  type="text" placeholder="ex: perquisition" bind:value={searchTerm} on:input|preventDefault={updateSearch}/>
+  <input class="input"  type="text" placeholder="ex: perquisition" bind:value={searchTerm} on:input={handleSearch}/>
   {#if filteredResults}
     {#each filteredResults as filteredResult, i}
-      <h2 class="subtitle">{filteredResult.titre}</h2>
-      {#each filteredResult.positions as position}
-        <p>
-          {position} - {getExtract(filteredResult.body, position)}
-        </p>
-      {/each}
+      <h2 class="subtitle">{filteredResult.question}</h2>
+      <p>
+        {filteredResult.response}
+      </p>
     {/each}
   {/if}
 </main>
