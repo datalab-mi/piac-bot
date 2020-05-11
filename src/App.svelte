@@ -12,6 +12,7 @@
   let data;
 	let autoscroll;
   let lunrIdx;
+  let etat = {};
 
   const normaliseSpelling = function (builder) {
     // Define a pipeline function that remove accents
@@ -45,7 +46,7 @@
       this.use(normaliseSpelling)
       this.use(lunr.fr)
       this.ref('id')
-      this.field('question')
+      this.field('question', {boost: 10})
       this.field('response')
       //this.field('responseGN')
 
@@ -65,7 +66,9 @@
 	});
 
 	let comments = [
-		{ auth: 'chatbot', text: 'hello' },
+		{ auth: 'chatbot', text: 'Bonjour,' },
+		{ auth: 'chatbot', text: 'Je suis PIAC Bot' },
+		{ auth: 'chatbot', text: 'Quelle est votre question ?' }
 	];
 
   function handleSubmit(event) {
@@ -81,17 +84,38 @@
 
       event.target.value = '';
 
-      const results = handleSearch(text)
-      console.log(data);
-      console.log(results);
+      const cleanText = text.replace('l\'','')
 
-      if (results.length > 0 ) {
-        handleAnswer(`J'ai trouvé les resultats suivants`)
-        results.forEach(result => {
-          setTimeout(() => { handleAnswer(result.response); }, 300)
-        })
+      const goodbyeRegex = /(merci|bye|chao|au revoir)/
+      if (cleanText.match(goodbyeRegex) && (cleanText.match(goodbyeRegex).length > 0)) {
+        handleAnswer(`Merci, au revoir`)
+      } else if (etat.results && etat.results.length > 0) {
+        const regex = /[0-9]+/g;
+        const found = cleanText.match(regex);
+        console.log(found[0]);
+        console.log(parseInt(found[0]));
+        const indexResult = parseInt(found[0] - 1)
+        console.log(indexResult);
+        console.log(etat.results)
+        console.log(data[indexResult])
+        handleAnswer(`${data[indexResult].response}`)
+        handleAnswer(`Voici plus de précision sur le sujet`)
+        delete etat.results
       } else {
-        handleAnswer(`Je n'ai pas trouvé de resultats`)
+        etat.results = handleSearch(cleanText)
+        if (etat.results.length > 0 ) {
+          handleAnswer(`J'ai trouvé les résultats suivants`)
+          etat.results.forEach(result => {
+            setTimeout(() => { 
+              handleAnswer(result.question); 
+              setTimeout(() => { 
+              }, 1000)
+            }, 1000)
+          })
+          handleAnswer('Quel question vous voulez en savoir plus?'); 
+        } else {
+          handleAnswer(`Je n'ai pas trouvé de résultats`)
+        }
       }
     }
   }
@@ -99,9 +123,12 @@
   const handleSearch = (searchTerm) => {
     if (searchTerm) {
       const results = lunrIdx.search(searchTerm)
-      const filteredResults = results.map(item => {
-        return data[item.ref]
-      })
+      const filteredResults = results
+        .filter(item => item.score > 0.9)
+        .map(item => {
+          console.log(item);
+          return data[item.ref]
+        })
       return filteredResults
     } else {
       return []
