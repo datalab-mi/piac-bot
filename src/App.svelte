@@ -13,11 +13,36 @@
 	let autoscroll;
   let lunrIdx;
 
+  const normaliseSpelling = function (builder) {
+    // Define a pipeline function that remove accents
+    var pipelineFunction = function (token) {
+      return token
+        .replace('á', 'a')
+        .replace('é', 'e')
+        .replace('í', 'i')
+        .replace('ó', 'o')
+        .replace('ú', 'u')
+        .replace('Á', 'A')
+        .replace('É', 'E')
+        .replace('Í', 'I')
+        .replace('Ó', 'O')
+        .replace('Ú', 'U');
+    }
+
+    // Register the pipeline function so the index can be serialised
+    lunr.Pipeline.registerFunction(pipelineFunction, 'normaliseSpelling')
+
+    // Add the pipeline function to both the indexing pipeline and the
+    // searching pipeline
+    builder.pipeline.before(lunr.stemmer, pipelineFunction)
+    builder.searchPipeline.before(lunr.stemmer, pipelineFunction)
+  }
 
   onMount(async () => {
     data = await loadData()
     lunrIdx = lunr(function () {
       console.log(`loaded ${data.length}`);
+      this.use(normaliseSpelling)
       this.use(lunr.fr)
       this.ref('id')
       this.field('question')
