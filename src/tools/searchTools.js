@@ -5,3 +5,9 @@ export const loadData = async () => {
   data = await res.json()
   return data
 }
+
+export const loadCountries = async () => {
+  const res = await fetch('__COUNTRIES__')
+  data = await res.json()
+  return data
+}

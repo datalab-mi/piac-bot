@@ -2,3 +2,7 @@
 /public/build/
 
 .DS_Store
+venv
+faq-saisis.json
+pays.csv
+pays.json

@@ -1,5 +1,5 @@
 <script>
-  import { loadData } from './tools/searchTools';
+  import { loadData, loadCountries } from './tools/searchTools';
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
   import lunr from 'lunr';
   import lunrstemmer from 'lunr-languages/lunr.stemmer.support';
@@ -10,8 +10,10 @@
 
 	let div;
   let data;
+  let countries;
 	let autoscroll;
   let lunrIdx;
+  let countriesIdx;
   let etat = {};
 
   const normaliseSpelling = function (builder) {
@@ -41,6 +43,17 @@
 
   onMount(async () => {
     data = await loadData()
+    countries = await loadCountries()
+    countriesIdx = lunr(function () {
+      this.use(lunr.fr)
+      this.ref('id')
+      this.field('country')
+
+      countries.forEach((doc, idx) => {
+        doc.id = idx
+        this.add(doc)
+      }, this)
+    })
     lunrIdx = lunr(function () {
       console.log(`loaded ${data.length}`);
       this.use(normaliseSpelling)
@@ -86,8 +99,26 @@
 
       const cleanText = text.replace('l\'','')
 
-      const goodbyeRegex = /(merci|bye|chao|au revoir)/
-      if (cleanText.match(goodbyeRegex) && (cleanText.match(goodbyeRegex).length > 0)) {
+      const goodbyeRegex = /(merci|bye|chao|au revoir)/gi
+      const renseignementsRegex = /(renseignements|informations patrimoniales)/gim
+
+      if (cleanText.match(renseignementsRegex) && (cleanText.match(renseignementsRegex).length > 0)) {
+        const foundCountry = countriesIdx.search(`${cleanText}~1`).
+          map(item => {
+            return countries[item.ref]
+          }).pop()
+        if (foundCountry) {
+          handleAnswer(`Par rapport à ${foundCountry.country}`)
+          console.log(foundCountry);
+          const hideMotifs = ['date', 'country', 'id']
+          Object.values(foundCountry).forEach((motif, idx) => {
+            console.log(motif, (motif != null), (hideMotifs.indexOf(Object.keys(foundCountry)[idx]) > -1))
+            if ((motif != null) && (hideMotifs.indexOf(Object.keys(foundCountry)[idx]) === -1)) handleAnswer(`${Object.keys(foundCountry)[idx]}: ${motif}`)
+          })
+        } else {
+          handleAnswer(`Vous cherchez de renseignements pour quel pays ?`)
+        }
+      } else if (cleanText.match(goodbyeRegex) && (cleanText.match(goodbyeRegex).length > 0)) {
         handleAnswer(`Merci, au revoir`)
       } else if (etat.results && etat.results.length > 0) {
         const regex = /[0-9]+/g;

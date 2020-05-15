@@ -17,7 +17,8 @@ export default {
 	},
 	plugins: [
     replace({
-      '__FAQ__': production ? 'faq-sample.json' : 'faq-saisis.json'
+      '__FAQ__': production ? 'faq-sample.json' : 'faq-saisis.json',
+      '__COUNTRIES__': production ? 'pays-sample.json' : 'pays.json'
     }),
 		svelte({
 			// enable run-time checks when not in production
