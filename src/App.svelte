@@ -1,6 +1,7 @@
 <script>
   import { loadData, loadCountries } from './tools/searchTools';
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
+  import { nodes, links } from './__CONVERSATION__';
   import lunr from 'lunr';
   import lunrstemmer from 'lunr-languages/lunr.stemmer.support';
   import lunrfr from 'lunr-languages/lunr.fr';
@@ -78,13 +79,50 @@
 		if (autoscroll) div.scrollTo(0, div.scrollHeight)
 	});
 
+
+  let state = {
+    position: 0,
+    end: 0,
+    attribution: {
+      child: null,
+      comment: false
+    }
+  }
+
+  state.position = nodes.find(x => x.id === 'A').id
+  state.childs = links.filter(x => x.from == state.position).map(x => x.to)
+
+  console.log(state);
+  console.log( state.childs.map(child => nodes.filter(x => child == x.id)))
+
 	let comments = [
 		{ auth: 'chatbot', text: 'Bonjour,' },
-		{ auth: 'chatbot', text: 'Je suis PIAC Bot' },
-		{ auth: 'chatbot', text: 'Quelle est votre question ?' }
+    { auth: 'chatbot', text: nodes.find(x => x.id === 'A').question },
+    { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0].text) }
 	];
 
-  function handleSubmit(event) {
+  const handleRules = (event) => {
+    if (event.target) {
+      console.log("This", event.target.innerHTML);
+      comments = comments.concat({
+        author: 'user',
+        text: event.target.innerHTML
+      });
+      state.position = nodes.find(x => x.text === event.target.innerHTML).id
+      state.childs = links.filter(x => x.from == state.position).map(x => x.to)
+      // state.position = nodes.find(x => x.id === selectId).text
+      comments = comments.concat({
+        author: 'chatbot',
+        text: nodes.find(x => x.id === state.position).question
+      });
+      comments = comments.concat({
+        author: 'chatbot',
+        options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0].text)
+      });
+    }
+  }
+
+  const handleSubmit = (event) => {
     if (event.which === 13) {
       event.preventDefault();
       const text = event.target.value;
@@ -95,59 +133,15 @@
         text
       });
 
-      event.target.value = '';
-
       const cleanText = text.replace('l\'','')
 
-      const goodbyeRegex = /(merci|bye|chao|au revoir)/gi
-      const renseignementsRegex = /(renseignements|informations patrimoniales)/gim
-
-      if (cleanText.match(renseignementsRegex) && (cleanText.match(renseignementsRegex).length > 0)) {
-        const foundCountry = countriesIdx.search(`${cleanText}~1`).
-          map(item => {
-            return countries[item.ref]
-          }).pop()
-        if (foundCountry) {
-          handleAnswer(`Par rapport à ${foundCountry.country}`)
-          console.log(foundCountry);
-          const hideMotifs = ['date', 'country', 'id']
-          Object.values(foundCountry).forEach((motif, idx) => {
-            console.log(motif, (motif != null), (hideMotifs.indexOf(Object.keys(foundCountry)[idx]) > -1))
-            if ((motif != null) && (hideMotifs.indexOf(Object.keys(foundCountry)[idx]) === -1)) handleAnswer(`${Object.keys(foundCountry)[idx]}: ${motif}`)
-          })
-        } else {
-          handleAnswer(`Vous cherchez de renseignements pour quel pays ?`)
-        }
-      } else if (cleanText.match(goodbyeRegex) && (cleanText.match(goodbyeRegex).length > 0)) {
-        handleAnswer(`Merci, au revoir`)
-      } else if (etat.results && etat.results.length > 0) {
-        const regex = /[0-9]+/g;
-        const found = cleanText.match(regex);
-        console.log(found[0]);
-        console.log(parseInt(found[0]));
-        const indexResult = parseInt(found[0] - 1)
-        console.log(indexResult);
-        console.log(etat.results)
-        console.log(data[indexResult])
-        handleAnswer(`${data[indexResult].response}`)
-        handleAnswer(`Voici plus de précision sur le sujet`)
-        delete etat.results
-      } else {
-        etat.results = handleSearch(cleanText)
-        if (etat.results.length > 0 ) {
-          handleAnswer(`J'ai trouvé les résultats suivants`)
-          etat.results.forEach(result => {
-            setTimeout(() => { 
-              handleAnswer(result.question); 
-              setTimeout(() => { 
-              }, 1000)
-            }, 1000)
-          })
-          handleAnswer('Quel question vous voulez en savoir plus?'); 
-        } else {
-          handleAnswer(`Je n'ai pas trouvé de résultats`)
-        }
+      const attributionRegex = /(attribution)/gim
+      if (cleanText.match(attributionRegex) && (cleanText.match(attributionRegex).length > 0)) {
+        state.attribution.comment = true
       }
+
+      handleRules(state)
+
     }
   }
 
@@ -251,7 +245,14 @@
 	<div class="scrollable" bind:this={div}>
 		{#each comments as comment}
 			<article class={comment.author}>
-				<span>{comment.text}</span>
+        {#if comment.text}
+          <span>{comment.text}</span>
+        {/if}
+        {#if comment.options}
+          {#each comment.options as option}
+            <span on:click={handleRules}>{option}</span>
+          {/each}
+        {/if}
 			</article>
 		{/each}
 	</div>
