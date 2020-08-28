@@ -101,7 +101,7 @@
     { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0].text) }
 	];
 
-  const handleRules = (event) => {
+  const handleRules = async (event) => {
     if (event.target) {
       console.log("This", event.target.innerHTML);
       comments = comments.concat({
@@ -111,10 +111,7 @@
       state.position = nodes.find(x => x.text === event.target.innerHTML).id
       state.childs = links.filter(x => x.from == state.position).map(x => x.to)
       // state.position = nodes.find(x => x.id === selectId).text
-      comments = comments.concat({
-        author: 'chatbot',
-        text: nodes.find(x => x.id === state.position).question
-      });
+      await handleAnswer(nodes.find(x => x.id === state.position).question)
       comments = comments.concat({
         author: 'chatbot',
         options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0].text)
@@ -161,20 +158,23 @@
   }
 
   const handleAnswer = (reply) => {
-    setTimeout(() => {
-      comments = comments.concat({
-        author: 'otheruser',
-        text: '...',
-        placeholder: true
-      });
-
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
-        comments = comments.filter(comment => !comment.placeholder).concat({
+        comments = comments.concat({
           author: 'otheruser',
-          text: reply
+          text: '...',
+          placeholder: true
         });
-      }, 500 + Math.random() * 500);
-    }, 200 + Math.random() * 200);
+
+        setTimeout(() => {
+          comments = comments.filter(comment => !comment.placeholder).concat({
+            author: 'otheruser',
+            text: reply
+          });
+          resolve(comments)
+        }, 500 + Math.random() * 500);
+      }, 200 + Math.random() * 200);
+    })
   }
 
 </script>
