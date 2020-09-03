@@ -239,6 +239,88 @@
 	.form input {
 		flex: 1 1 auto;
 	}
+
+  .button.is-loading::after, .loader, .select.is-loading::after, .control.is-loading::after {
+    -webkit-animation: spinAround 500ms infinite linear;
+    animation: spinAround 500ms infinite linear;
+    border: 2px solid #dbdbdb;
+    border-radius: 290486px;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    content: "";
+    display: block;
+    height: 1em;
+    position: relative;
+    width: 1em;
+  }
+
+  .button, .input, .textarea, .file-cta,
+  .file-name, .pagination-previous,
+  .pagination-next,
+  .pagination-link,
+  .pagination-ellipsis {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    box-shadow: none;
+    display: inline-flex;
+    font-size: 1rem;
+    height: 2.5em;
+    justify-content: flex-start;
+    line-height: 1.5;
+    padding-bottom: calc(0.5em - 1px);
+    padding-left: calc(0.75em - 1px);
+    padding-right: calc(0.75em - 1px);
+    padding-top: calc(0.5em - 1px);
+    position: relative;
+    vertical-align: top;
+  }
+
+  button,
+  input {
+    margin: 0;
+  }
+
+  .button {
+    background-color: white;
+    border-color: #dbdbdb;
+    border-width: 1px;
+    color: #363636;
+    cursor: pointer;
+    justify-content: center;
+    padding-bottom: calc(0.5em - 1px);
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-top: calc(0.5em - 1px);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .buttons {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .buttons .button {
+    margin-bottom: 0.5rem;
+  }
+
+  .buttons .button:not(:last-child):not(.is-fullwidth) {
+    margin-right: 0.5rem;
+  }
+
+  .buttons:last-child {
+    margin-bottom: -0.5rem;
+  }
+
+  .buttons:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+
 </style>
 
 <div class="chat">
@@ -251,9 +333,11 @@
           <span>{comment.text}</span>
         {/if}
         {#if comment.options}
+          <div class="buttons">
           {#each comment.options as option}
-            <span on:click={handleRules(option)}>{option.text}</span>
+            <button class="button" on:click={handleRules(option)}>{option.text}</button>
           {/each}
+          </div>
         {/if}
 			</article>
 		{/each}
