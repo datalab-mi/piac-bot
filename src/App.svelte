@@ -89,33 +89,35 @@
     }
   }
 
-  state.position = nodes.find(x => x.id === 'A').id
+  state.position = nodes.find(x => x.id === 'start').id
   state.childs = links.filter(x => x.from == state.position).map(x => x.to)
-
-  console.log(state);
-  console.log( state.childs.map(child => nodes.filter(x => child == x.id)))
 
 	let comments = [
 		{ auth: 'chatbot', text: 'Bonjour,' },
-    { auth: 'chatbot', text: nodes.find(x => x.id === 'A').question },
-    { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0].text) }
+    { auth: 'chatbot', text: nodes.find(x => x.id === 'start').question },
+    { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => {
+      return {text: x[0].text, id: x[0].id}
+    }) }
 	];
 
-  const handleRules = async (event) => {
-    if (event.target) {
-      console.log("This", event.target.innerHTML);
+  const handleRules = async (option) => {
+    if (option.id) {
       comments = comments.concat({
         author: 'user',
-        text: event.target.innerHTML
+        text: option.text
       });
-      state.position = nodes.find(x => x.text === event.target.innerHTML).id
+      state.position = nodes.find(x => x.id === option.id).id
       state.childs = links.filter(x => x.from == state.position).map(x => x.to)
-      // state.position = nodes.find(x => x.id === selectId).text
       await handleAnswer(nodes.find(x => x.id === state.position).question)
-      comments = comments.concat({
-        author: 'chatbot',
-        options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0].text)
-      });
+
+      if (state.childs.length > 1) {
+        comments = comments.concat({
+          author: 'chatbot',
+          options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => {
+            return {text: x[0].text, id: x[0].id}
+          })
+        });
+      }
     }
   }
 
@@ -250,7 +252,7 @@
         {/if}
         {#if comment.options}
           {#each comment.options as option}
-            <span on:click={handleRules}>{option}</span>
+            <span on:click={handleRules(option)}>{option.text}</span>
           {/each}
         {/if}
 			</article>

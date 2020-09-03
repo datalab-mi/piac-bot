@@ -2,7 +2,7 @@ export const nodes = [
   {
     question: 'What your favourite color ? ',
     text: 'Hello',
-    id: 'A'
+    id: 'start'
   },
   {
     question: 'Like the sun ',
@@ -28,19 +28,19 @@ export const nodes = [
 
 export const links = [
   {
-    from: 'A',
+    from: 'start',
     to: 'B'
   },
   {
-    from: 'A',
+    from: 'start',
     to: 'C'
   },
   {
-    from: 'A',
+    from: 'start',
     to: 'D'
   },
   {
-    from: 'A',
+    from: 'start',
     to: 'E'
   }
 ]
