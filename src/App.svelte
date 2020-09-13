@@ -81,8 +81,9 @@
 
 
   let state = {
-    position: 0,
-    end: 0,
+    position: null,
+    childs: [],
+    history: [],
     attribution: {
       child: null,
       comment: false
@@ -91,6 +92,7 @@
 
   state.position = nodes.find(x => x.id === 'start').id
   state.childs = links.filter(x => x.from == state.position).map(x => x.to)
+  state.position = 'vehicule-affecte-enqueteur'
 
 	let comments = [
 		{ auth: 'chatbot', text: 'Bonjour,' },
@@ -110,6 +112,9 @@
       state.childs = links.filter(x => x.from == state.position).map(x => x.to)
       await handleAnswer(nodes.find(x => x.id === state.position).question)
 
+      console.log(state.position);
+
+
       if (state.childs.length > 1) {
         comments = comments.concat({
           author: 'chatbot',
@@ -117,6 +122,14 @@
             return {text: x[0].text, id: x[0].id}
           })
         });
+      } else if (state.childs.length === 1) {
+        if (state.childs[0] === 'questions-vehicule') {
+          comments = comments.concat({
+            author: 'user',
+            text: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0].question)
+          });
+        }
+
       }
     }
   }
@@ -132,14 +145,18 @@
         text
       });
 
-      const cleanText = text.replace('l\'','')
+      if (state.position = 'vehicule-affecte-enqueteur') {
+        const cleanText = text.replace('l\'','')
 
-      const attributionRegex = /(attribution)/gim
-      if (cleanText.match(attributionRegex) && (cleanText.match(attributionRegex).length > 0)) {
-        state.attribution.comment = true
+        const response = handleSearch(cleanText)
+        console.log(response);
+
+        //const attributionRegex = /(attribution)/gim
+        //if (cleanText.match(attributionRegex) && (cleanText.match(attributionRegex).length > 0)) {
+        //  state.attribution.comment = true
+        //}
+
       }
-
-      handleRules(state)
 
     }
   }
@@ -150,7 +167,7 @@
       const filteredResults = results
         .filter(item => item.score > 0.9)
         .map(item => {
-          console.log(item);
+          // console.log(item);
           return data[item.ref]
         })
       return filteredResults
