@@ -117,6 +117,10 @@
             return {text: x[0].text, id: x[0].id}
           })
         });
+      } else if (state.childs.length === 1) {
+        if (state.childs[0].includes('questions-vehicule')) {
+          handleRules(nodes.find(x => state.childs[0] == x.id))
+        }
       }
     }
   }
@@ -330,7 +334,7 @@
 		{#each comments as comment}
 			<article class={comment.author}>
         {#if comment.text}
-          <span>{comment.text}</span>
+          <span>{@html comment.text}</span>
         {/if}
         {#if comment.options}
           <div class="buttons">
