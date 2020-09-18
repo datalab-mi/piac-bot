@@ -100,12 +100,12 @@
     }) }
 	];
 
-  const handleRules = async (option) => {
+  const handleRules = async (option, idx) => {
     if (option.id) {
-      comments = comments.concat({
-        author: 'user',
-        text: option.text
-      });
+      comments = comments.slice(0, idx + 1)
+      comments[idx].options.forEach(option => delete option.selected)
+      option.selected = true
+
       state.position = nodes.find(x => x.id === option.id).id
       state.childs = links.filter(x => x.from == state.position).map(x => x.to)
       await handleAnswer(nodes.find(x => x.id === state.position).question)
@@ -213,7 +213,7 @@
 	}
 
 	.user {
-		text-align: right;
+    text-align: right;
 	}
 
 	span {
@@ -244,25 +244,7 @@
 		flex: 1 1 auto;
 	}
 
-  .button.is-loading::after, .loader, .select.is-loading::after, .control.is-loading::after {
-    -webkit-animation: spinAround 500ms infinite linear;
-    animation: spinAround 500ms infinite linear;
-    border: 2px solid #dbdbdb;
-    border-radius: 290486px;
-    border-right-color: transparent;
-    border-top-color: transparent;
-    content: "";
-    display: block;
-    height: 1em;
-    position: relative;
-    width: 1em;
-  }
-
-  .button, .input, .textarea, .file-cta,
-  .file-name, .pagination-previous,
-  .pagination-next,
-  .pagination-link,
-  .pagination-ellipsis {
+  .button {
     -moz-appearance: none;
     -webkit-appearance: none;
     align-items: center;
@@ -302,8 +284,13 @@
     white-space: nowrap;
   }
 
+  .selected {
+    color: white;
+    background-color: teal;
+  }
+
   .buttons {
-    align-items: center;
+    align-items: left;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -331,19 +318,21 @@
 	<h1 class="title">PIAC Bot</h1>
 
 	<div class="scrollable" bind:this={div}>
-		{#each comments as comment}
-			<article class={comment.author}>
+		{#each comments as comment, idx}
         {#if comment.text}
+			<article class="otheruser">
           <span>{@html comment.text}</span>
+			</article>
         {/if}
         {#if comment.options}
-          <div class="buttons">
+			<article>
+          <div class="buttons user">
           {#each comment.options as option}
-            <button class="button" on:click={handleRules(option)}>{option.text}</button>
+            <button class="button { option.selected ? 'selected' : ''}" on:click={handleRules(option, idx)}>{option.text}</button>
           {/each}
           </div>
-        {/if}
 			</article>
+        {/if}
 		{/each}
 	</div>
 
