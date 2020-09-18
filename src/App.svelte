@@ -102,10 +102,11 @@
 
   const handleRules = async (option) => {
     if (option.id) {
-      comments = comments.concat({
-        author: 'user',
-        text: option.text
-      });
+      option.selected = true
+      // comments = comments.concat({
+      //   author: 'user',
+      //   text: option.text
+      // });
       state.position = nodes.find(x => x.id === option.id).id
       state.childs = links.filter(x => x.from == state.position).map(x => x.to)
       await handleAnswer(nodes.find(x => x.id === state.position).question)
@@ -213,7 +214,7 @@
 	}
 
 	.user {
-		text-align: right;
+    text-align: right;
 	}
 
 	span {
@@ -302,8 +303,24 @@
     white-space: nowrap;
   }
 
+  .button-selected {
+    background-color: teal;
+    border-color: #dbdbdb;
+    border-width: 1px;
+    color: white;
+    cursor: pointer;
+    justify-content: center;
+    padding-bottom: calc(0.5em - 1px);
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-top: calc(0.5em - 1px);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+
   .buttons {
-    align-items: center;
+    align-items: right;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -332,18 +349,20 @@
 
 	<div class="scrollable" bind:this={div}>
 		{#each comments as comment}
-			<article class={comment.author}>
         {#if comment.text}
+			<article class="otheruser">
           <span>{@html comment.text}</span>
+			</article>
         {/if}
         {#if comment.options}
-          <div class="buttons">
+			<article>
+          <div class="buttons user">
           {#each comment.options as option}
-            <button class="button" on:click={handleRules(option)}>{option.text}</button>
+            <button class="{ option.selected ? 'button-selected' : 'button'}" on:click={handleRules(option)}>{option.text}</button>
           {/each}
           </div>
-        {/if}
 			</article>
+        {/if}
 		{/each}
 	</div>
 
