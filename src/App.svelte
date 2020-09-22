@@ -1,75 +1,9 @@
 <script>
-  import { loadData, loadCountries } from './tools/searchTools';
-	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
+	import { beforeUpdate, afterUpdate } from 'svelte';
   import { nodes, links } from './__CONVERSATION__';
-  import lunr from 'lunr';
-  import lunrstemmer from 'lunr-languages/lunr.stemmer.support';
-  import lunrfr from 'lunr-languages/lunr.fr';
-
-  lunrstemmer(lunr)
-  lunrfr(lunr)
 
 	let div;
-  let data;
-  let countries;
 	let autoscroll;
-  let lunrIdx;
-  let countriesIdx;
-  let etat = {};
-
-  const normaliseSpelling = function (builder) {
-    // Define a pipeline function that remove accents
-    var pipelineFunction = function (token) {
-      return token
-        .replace('á', 'a')
-        .replace('é', 'e')
-        .replace('í', 'i')
-        .replace('ó', 'o')
-        .replace('ú', 'u')
-        .replace('Á', 'A')
-        .replace('É', 'E')
-        .replace('Í', 'I')
-        .replace('Ó', 'O')
-        .replace('Ú', 'U');
-    }
-
-    // Register the pipeline function so the index can be serialised
-    lunr.Pipeline.registerFunction(pipelineFunction, 'normaliseSpelling')
-
-    // Add the pipeline function to both the indexing pipeline and the
-    // searching pipeline
-    builder.pipeline.before(lunr.stemmer, pipelineFunction)
-    builder.searchPipeline.before(lunr.stemmer, pipelineFunction)
-  }
-
-  onMount(async () => {
-    data = await loadData()
-    countries = await loadCountries()
-    countriesIdx = lunr(function () {
-      this.use(lunr.fr)
-      this.ref('id')
-      this.field('country')
-
-      countries.forEach((doc, idx) => {
-        doc.id = idx
-        this.add(doc)
-      }, this)
-    })
-    lunrIdx = lunr(function () {
-      console.log(`loaded ${data.length}`);
-      this.use(normaliseSpelling)
-      this.use(lunr.fr)
-      this.ref('id')
-      this.field('question', {boost: 10})
-      this.field('response')
-      //this.field('responseGN')
-
-      data.forEach((doc, idx) => {
-        doc.id = idx
-        this.add(doc)
-      }, this)
-    })
-  })
 
 	beforeUpdate(() => {
 		autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
@@ -79,14 +13,9 @@
 		if (autoscroll) div.scrollTo(0, div.scrollHeight)
 	});
 
-
   let state = {
     position: 0,
-    end: 0,
-    attribution: {
-      child: null,
-      comment: false
-    }
+    childs: []
   }
 
   state.position = nodes.find(x => x.id === 'start').id
@@ -122,29 +51,6 @@
           handleRules(nodes.find(x => state.childs[0] == x.id))
         }
       }
-    }
-  }
-
-  const handleSubmit = (event) => {
-    if (event.which === 13) {
-      event.preventDefault();
-      const text = event.target.value;
-      if (!text) return;
-
-      comments = comments.concat({
-        author: 'user',
-        text
-      });
-
-      const cleanText = text.replace('l\'','')
-
-      const attributionRegex = /(attribution)/gim
-      if (cleanText.match(attributionRegex) && (cleanText.match(attributionRegex).length > 0)) {
-        state.attribution.comment = true
-      }
-
-      handleRules(state)
-
     }
   }
 
@@ -227,23 +133,6 @@
 		border-radius: 1em 1em 1em 0;
 	}
 
-	.user span {
-		background-color: var(--color-conversation-user);
-		color: var(--color-conversation-user-contrast);
-		border-radius: 1em 1em 0 1em;
-	}
-
-	.form {
-		padding: 0.6em 1em 0.2em 1em;
-		display: flex;
-		box-shadow: 0 -2px 1px rgba(0, 0, 0, 0.1);
-		position: relative;
-	}
-
-	.form input {
-		flex: 1 1 auto;
-	}
-
   .button {
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -264,8 +153,7 @@
     vertical-align: top;
   }
 
-  button,
-  input {
+  button{
     margin: 0;
   }
 
@@ -334,9 +222,5 @@
 			</article>
         {/if}
 		{/each}
-	</div>
-
-	<div class="form">
-		<input on:keydown={handleSubmit}>
 	</div>
 </div>
