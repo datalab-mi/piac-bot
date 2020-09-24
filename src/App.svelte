@@ -1,4 +1,5 @@
 <script>
+  import NetworkGraph from './NetworkGraph.svelte';
 	import { beforeUpdate, afterUpdate } from 'svelte';
   import { nodes, links } from './__CONVERSATION__';
 
@@ -19,7 +20,7 @@
   }
 
   state.position = nodes.find(x => x.id === 'start').id
-  state.childs = links.filter(x => x.from == state.position).map(x => x.to)
+  state.childs = links.filter(x => x.source == state.position).map(x => x.target)
 
 	let comments = [
 		{ auth: 'chatbot', text: 'Bonjour,' },
@@ -36,7 +37,7 @@
       option.selected = true
 
       state.position = nodes.find(x => x.id === option.id).id
-      state.childs = links.filter(x => x.from == state.position).map(x => x.to)
+      state.childs = links.filter(x => x.source == state.position).map(x => x.target)
       await handleAnswer(nodes.find(x => x.id === state.position).question)
 
       if (state.childs.length > 1) {
@@ -201,6 +202,10 @@
   }
 
 </style>
+
+<div class="chart">
+  <NetworkGraph nodesInput={nodes} linksInput={links} />
+</div>
 
 <div class="chat">
 	<h1 class="title">PIAC Bot</h1>

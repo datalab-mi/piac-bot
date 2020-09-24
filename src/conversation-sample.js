@@ -28,19 +28,19 @@ export const nodes = [
 
 export const links = [
   {
-    from: 'start',
-    to: 'B'
+    source: 'start',
+    target: 'B'
   },
   {
-    from: 'start',
-    to: 'C'
+    source: 'start',
+    target: 'C'
   },
   {
-    from: 'start',
-    to: 'D'
+    source: 'start',
+    target: 'D'
   },
   {
-    from: 'start',
-    to: 'E'
+    source: 'start',
+    target: 'E'
   }
 ]
