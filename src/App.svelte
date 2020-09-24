@@ -2,6 +2,7 @@
   import NetworkGraph from './NetworkGraph.svelte';
 	import { beforeUpdate, afterUpdate } from 'svelte';
   import { nodes, links } from './__CONVERSATION__';
+  import { networkVisibility } from './stores';
 
 	let div;
 	let autoscroll;
@@ -201,14 +202,21 @@
     margin-bottom: 1rem;
   }
 
+  .navbar-end {
+    justify-content: flex-end;
+    margin-left: auto;
+  }
 </style>
 
-<div class="chart">
-  <NetworkGraph nodesInput={nodes} linksInput={links} />
-</div>
+<NetworkGraph nodesInput={nodes} linksInput={links}/>
 
 <div class="chat">
-	<h1 class="title">PIAC Bot</h1>
+
+  <h1 class="title">PIAC Bot</h1>
+  <div class="navbar-end">
+    <button on:click={() => $networkVisibility = true} class="button">Graphe</button>
+  </div>
+
 
 	<div class="scrollable" bind:this={div}>
 		{#each comments as comment, idx}
