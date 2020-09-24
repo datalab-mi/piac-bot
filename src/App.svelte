@@ -27,7 +27,7 @@
 		{ auth: 'chatbot', text: 'Bonjour,' },
     { auth: 'chatbot', text: nodes.find(x => x.id === 'start').question },
     { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => {
-      return {text: x[0].text, id: x[0].id}
+      return x[0]
     }) }
 	];
 
@@ -45,7 +45,7 @@
         comments = comments.concat({
           author: 'chatbot',
           options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => {
-            return {text: x[0].text, id: x[0].id}
+            return x[0]
           })
         });
       } else if (state.childs.length === 1) {
@@ -206,6 +206,141 @@
     justify-content: flex-end;
     margin-left: auto;
   }
+
+  @-webkit-keyframes spinAround {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(359deg);
+    }
+  }
+
+  @keyframes spinAround {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(359deg);
+    }
+  }
+
+  /* line 67, src/sass/app.sass */
+  [data-tooltip]:not(.is-loading), [data-tooltip]:not(.is-disabled), [data-tooltip]:not([disabled]) {
+    cursor: pointer;
+    overflow: visible;
+    position: relative;
+  }
+
+  /* line 36, src/sass/app.sass */
+  [data-tooltip]:not(.is-loading)::before, [data-tooltip]:not(.is-disabled)::before, [data-tooltip]:not([disabled])::before {
+    box-sizing: border-box;
+    color: white;
+    display: inline-block;
+    font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    font-size: 0.75rem;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    visibility: hidden;
+    z-index: 1020;
+    background: rgba(74, 74, 74, 0.9);
+    border-radius: 2px;
+    content: attr(data-tooltip);
+    padding: 0.5rem 1rem;
+    text-overflow: ellipsis;
+    white-space: pre-line;
+  }
+
+  /* line 22, src/sass/_position.sass */
+  [data-tooltip]:not(.is-loading)::before, [data-tooltip]:not(.is-disabled)::before, [data-tooltip]:not([disabled])::before {
+    top: 0;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    top: 0;
+    margin-top: -5px;
+    margin-bottom: auto;
+    transform: translate(-50%, -100%);
+  }
+
+  [data-tooltip]:not(.is-loading).has-tooltip-right::before, [data-tooltip]:not(.is-disabled).has-tooltip-right::before, [data-tooltip]:not([disabled]).has-tooltip-right::before {
+    top: auto;
+    right: -5px;
+    bottom: 50%;
+    left: auto;
+    margin-top: auto;
+    transform: translate(100%, 50%);
+  }
+
+  [data-tooltip]:not(.is-loading).has-tooltip-text-right::before, [data-tooltip]:not(.is-disabled).has-tooltip-text-right::before, [data-tooltip]:not([disabled]).has-tooltip-text-right::before {
+    text-align: right;
+  }
+
+  [data-tooltip]:not(.is-loading):hover::before, [data-tooltip]:not(.is-loading):hover::after, [data-tooltip]:not(.is-loading).has-tooltip-active::before, [data-tooltip]:not(.is-loading).has-tooltip-active::after, [data-tooltip]:not(.is-disabled):hover::before, [data-tooltip]:not(.is-disabled):hover::after, [data-tooltip]:not(.is-disabled).has-tooltip-active::before, [data-tooltip]:not(.is-disabled).has-tooltip-active::after, [data-tooltip]:not([disabled]):hover::before, [data-tooltip]:not([disabled]):hover::after, [data-tooltip]:not([disabled]).has-tooltip-active::before, [data-tooltip]:not([disabled]).has-tooltip-active::after {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  [data-tooltip]:not(.is-loading).has-tooltip-fade::before, [data-tooltip]:not(.is-loading).has-tooltip-fade::after, [data-tooltip]:not(.is-disabled).has-tooltip-fade::before, [data-tooltip]:not(.is-disabled).has-tooltip-fade::after, [data-tooltip]:not([disabled]).has-tooltip-fade::before, [data-tooltip]:not([disabled]).has-tooltip-fade::after {
+    transition: opacity 0.3s linear, visibility 0.3s linear;
+  }
+
+  @media screen and (max-width: 768px) {
+    /* line 10, src/sass/_position.sass */
+    [data-tooltip]:not(.is-loading).has-tooltip-top-mobile.has-tooltip-arrow::after, [data-tooltip]:not(.is-disabled).has-tooltip-top-mobile.has-tooltip-arrow::after, [data-tooltip]:not([disabled]).has-tooltip-top-mobile.has-tooltip-arrow::after {
+      top: 0;
+      right: auto;
+      bottom: auto;
+      left: 50%;
+      margin-top: -5px;
+      margin-right: auto;
+      margin-bottom: auto;
+      margin-left: -5px;
+      border-color: rgba(74, 74, 74, 0.9) transparent transparent transparent;
+    }
+    /* line 22, src/sass/_position.sass */
+    [data-tooltip]:not(.is-loading).has-tooltip-top-mobile::before, [data-tooltip]:not(.is-disabled).has-tooltip-top-mobile::before, [data-tooltip]:not([disabled]).has-tooltip-top-mobile::before {
+      top: 0;
+      right: auto;
+      bottom: auto;
+      left: 50%;
+      top: 0;
+      margin-top: -5px;
+      margin-bottom: auto;
+      transform: translate(-50%, -100%);
+    }
+  }
+
+  @media screen and (min-width: 769px), print {
+    /* line 10, src/sass/_position.sass */
+    [data-tooltip]:not(.is-loading).has-tooltip-top-tablet.has-tooltip-arrow::after, [data-tooltip]:not(.is-disabled).has-tooltip-top-tablet.has-tooltip-arrow::after, [data-tooltip]:not([disabled]).has-tooltip-top-tablet.has-tooltip-arrow::after {
+      top: 0;
+      right: auto;
+      bottom: auto;
+      left: 50%;
+      margin-top: -5px;
+      margin-right: auto;
+      margin-bottom: auto;
+      margin-left: -5px;
+      border-color: rgba(74, 74, 74, 0.9) transparent transparent transparent;
+    }
+    /* line 22, src/sass/_position.sass */
+    [data-tooltip]:not(.is-loading).has-tooltip-top-tablet::before, [data-tooltip]:not(.is-disabled).has-tooltip-top-tablet::before, [data-tooltip]:not([disabled]).has-tooltip-top-tablet::before {
+      top: 0;
+      right: auto;
+      bottom: auto;
+      left: 50%;
+      top: 0;
+      margin-top: -5px;
+      margin-bottom: auto;
+      transform: translate(-50%, -100%);
+    }
+  }
 </style>
 
 <NetworkGraph nodesInput={nodes} linksInput={links}/>
@@ -229,7 +364,7 @@
 			<article>
           <div class="buttons user">
           {#each comment.options as option}
-            <button class="button { option.selected ? 'selected' : ''}" on:click={handleRules(option, idx)}>{option.text}</button>
+            <button class="button { option.selected ? 'selected' : ''}  has-tooltip-right" data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
           {/each}
           </div>
 			</article>
