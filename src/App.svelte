@@ -37,9 +37,10 @@
       comments[idx].options.forEach(option => delete option.selected)
       option.selected = true
 
-      state.position = nodes.find(x => x.id === option.id).id
-      state.childs = links.filter(x => x.source == state.position).map(x => x.target)
-      await handleAnswer(nodes.find(x => x.id === state.position).question)
+      state.position = nodes.find(x => x.id === option.id)
+      state.childs = links.filter(x => x.source == state.position.id).map(x => x.target)
+      await handleAnswer(state.position.question)
+      if (state.position.extraInfo) await handleAnswer(state.position.extraInfo)
 
       if (state.childs.length > 1) {
         comments = comments.concat({
