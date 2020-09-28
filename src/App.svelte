@@ -33,9 +33,11 @@
 
   const handleRules = async (option, idx) => {
     if (option.id) {
-      comments = comments.slice(0, idx + 1)
-      comments[idx].options.forEach(option => delete option.selected)
-      option.selected = true
+      if (idx) {
+        comments = comments.slice(0, idx + 1)
+        comments[idx].options.forEach(option => delete option.selected)
+        option.selected = true
+      }
 
       state.position = nodes.find(x => x.id === option.id)
       state.childs = links.filter(x => x.source == state.position.id).map(x => x.target)
@@ -45,9 +47,7 @@
       if (state.childs.length > 1) {
         comments = comments.concat({
           author: 'chatbot',
-          options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => {
-            return x[0]
-          })
+          options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0])
         });
       } else if (state.childs.length === 1) {
         if (state.childs[0].includes('questions-vehicule')) {
