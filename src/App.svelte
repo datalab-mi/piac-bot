@@ -35,14 +35,14 @@
     if (option.id) {
       if (idx) {
         comments = comments.slice(0, idx + 1)
-        comments[idx].options.forEach(option => delete option.selected)
+        comments[idx].options.forEach(option => option.selected = false)
         option.selected = true
       }
 
       state.position = nodes.find(x => x.id === option.id)
       state.childs = links.filter(x => x.source == state.position.id).map(x => x.target)
-      await handleAnswer(state.position.question)
       if (state.position.extraInfo) await handleAnswer(state.position.extraInfo)
+      await handleAnswer(state.position.question, state.position.questionTooltip)
 
       if (state.childs.length > 1) {
         comments = comments.concat({
@@ -72,7 +72,7 @@
     }
   }
 
-  const handleAnswer = (reply) => {
+  const handleAnswer = (reply, tooltip) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         comments = comments.concat({
@@ -84,7 +84,8 @@
         setTimeout(() => {
           comments = comments.filter(comment => !comment.placeholder).concat({
             author: 'otheruser',
-            text: reply
+            text: reply,
+            tooltip
           });
           resolve(comments)
         }, 500 + Math.random() * 500);
@@ -178,6 +179,12 @@
   .selected {
     color: white;
     background-color: teal;
+  }
+
+  .is-danger {
+    background-color: #f14668;
+    border-color: transparent;
+    color: #fff;
   }
 
   .buttons {
@@ -339,6 +346,13 @@
       transform: translate(-50%, -100%);
     }
   }
+
+  .button.is-rounded {
+    border-radius: 290486px;
+    padding-left: calc(1em + 0.25em);
+    padding-right: calc(1em + 0.25em);
+  }
+
 </style>
 
 <NetworkGraph nodesInput={nodes} linksInput={links}/>
@@ -355,7 +369,10 @@
 		{#each comments as comment, idx}
         {#if comment.text}
 			<article class="otheruser">
-          <span>{@html comment.text}</span>
+        <span>{@html comment.text}</span>
+          {#if comment.tooltip}
+            <button class="button has-tooltip-right is-rounded" data-tooltip="{comment.tooltip}">i</button>
+          {/if}
 			</article>
         {/if}
         {#if comment.options}
