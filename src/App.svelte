@@ -34,9 +34,16 @@
   const handleRules = async (option, idx) => {
     if (option.id) {
       if (idx) {
+        comments.forEach((comment, index) => {
+          if (comment.options && index === idx) {
+            comment.options.forEach(option => option.selected = "unselected")
+          }
+          if (comment.options && index > idx) {
+            comment.options.forEach(option => option.selected = null)
+          }
+        })
         comments = comments.slice(0, idx + 1)
-        comments[idx].options.forEach(option => option.selected = false)
-        option.selected = true
+        option.selected = "selected"
       }
 
       state.position = nodes.find(x => x.id === option.id)
@@ -162,10 +169,10 @@
   }
 
   .button {
-    background-color: white;
-    border-color: #dbdbdb;
-    border-width: 1px;
+    border-color: #4a4a4a;
     color: #363636;
+    background-color: white;
+    border-width: 1px;
     cursor: pointer;
     justify-content: center;
     padding-bottom: calc(0.5em - 1px);
@@ -179,6 +186,13 @@
   .selected {
     color: white;
     background-color: teal;
+    border-color: #3273dc;
+  }
+
+  .button.disabled {
+    border-color: #dbdbdb;
+    color: #363636;
+    box-shadow: none;
   }
 
   .is-danger {
@@ -379,7 +393,7 @@
 			<article>
           <div class="buttons user">
           {#each comment.options as option}
-            <button class="button { option.selected ? 'selected' : ''}  has-tooltip-right" data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
+            <button class="button { option.selected === "selected" ? 'selected' : ''} {option.selected === "unselected" ? 'disabled' : ''} has-tooltip-right"  data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
           {/each}
           </div>
 			</article>
