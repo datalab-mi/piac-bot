@@ -6,6 +6,7 @@
 
 	let div;
 	let autoscroll;
+  let editMode = false;
 
 	beforeUpdate(() => {
 		autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
@@ -26,9 +27,7 @@
 	let comments = [
 		{ auth: 'chatbot', text: 'Bonjour,' },
     { auth: 'chatbot', text: nodes.find(x => x.id === 'start').question },
-    { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => {
-      return x[0]
-    }) }
+    { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0]) }
 	];
 
   const handleRules = async (option, idx) => {
@@ -48,13 +47,12 @@
 
       state.position = nodes.find(x => x.id === option.id)
       state.childs = links.filter(x => x.source == state.position.id).map(x => x.target)
-      if (state.position.extraInfo) await handleAnswer(state.position.extraInfo)
-      await handleAnswer(state.position.question, state.position.questionTooltip)
+      await handleAnswer({...state.position}) //.question, state.position.questionTooltip)
 
       if (state.childs.length > 1) {
         comments = comments.concat({
           author: 'chatbot',
-          options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0])
+          options: state.childs.map(child => nodes.find(x => child == x.id))
         });
       } else if (state.childs.length === 1) {
         if (state.childs[0].includes('questions-vehicule')) {
@@ -64,22 +62,8 @@
     }
   }
 
-  const handleSearch = (searchTerm) => {
-    if (searchTerm) {
-      const results = lunrIdx.search(searchTerm)
-      const filteredResults = results
-        .filter(item => item.score > 0.9)
-        .map(item => {
-          console.log(item);
-          return data[item.ref]
-        })
-      return filteredResults
-    } else {
-      return []
-    }
-  }
-
-  const handleAnswer = (reply, tooltip) => {
+  //const handleAnswer = (reply, tooltip) => {
+  const handleAnswer = (reply) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         comments = comments.concat({
@@ -91,13 +75,34 @@
         setTimeout(() => {
           comments = comments.filter(comment => !comment.placeholder).concat({
             author: 'otheruser',
-            text: reply,
-            tooltip
+            text: reply.question,
+            tooltip: reply.tooltip && reply.tooltip,
+            id: reply.id && reply.id
           });
           resolve(comments)
         }, 500 + Math.random() * 500);
       }, 200 + Math.random() * 200);
     })
+  }
+
+  const editNode = () => {
+    if (editMode) {
+      comments.forEach(comment => {
+        if (comment.id) {
+          const nodeIdx = nodes.findIndex(x => x.id === comment.id)
+          nodes[nodeIdx]['question'] = comment.text
+        }
+        if (comment.options !== undefined) {
+          comment.options.forEach(option => {
+            const optionIdx = nodes.findIndex(x => x.id === comment.id)
+            if (optionIdx !== undefined &&  optionIdx >= 0) {
+              nodes[optionIdx]['text'] = option.text
+            }
+          })
+        }
+      })
+    }
+    editMode = !editMode
   }
 
 </script>
@@ -376,28 +381,42 @@
   <h1 class="title">PIAC Bot</h1>
   <div class="navbar-end">
     <button on:click={() => $networkVisibility = true} class="button">Graphe</button>
+    <button on:click={() => editNode()} class="button {editMode ? 'is-danger' : ''}">
+      {#if editMode}
+        Sauvegarder changements
+      {:else}
+        Éditer
+      {/if}
+    </button>
   </div>
 
-
-	<div class="scrollable" bind:this={div}>
-		{#each comments as comment, idx}
+  <div class="scrollable" bind:this={div}>
+    {#each comments as comment, idx}
         {#if comment.text}
-			<article class="otheruser">
-        <span>{@html comment.text}</span>
+        <article class="otheruser">
+          {#if editMode}
+            <input bind:value="{comments[idx].text}">
+          {:else}
+            <span>{@html comment.text}</span>
+          {/if}
           {#if comment.tooltip}
             <button class="button has-tooltip-right is-rounded" data-tooltip="{comment.tooltip}">i</button>
           {/if}
-			</article>
-        {/if}
-        {#if comment.options}
-			<article>
+        </article>
+      {/if}
+      {#if comment.options}
+        <article>
           <div class="buttons user">
-          {#each comment.options as option}
-            <button class="button { option.selected === "selected" ? 'selected' : ''} {option.selected === "unselected" ? 'disabled' : ''} has-tooltip-right"  data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
-          {/each}
+            {#each comment.options as option}
+              {#if editMode}
+                <input bind:value="{option.text}">
+              {:else}
+                <button class="button { option.selected === "selected" ? 'selected' : ''} {option.selected === "unselected" ? 'disabled' : ''} has-tooltip-right"  data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
+              {/if}
+            {/each}
           </div>
-			</article>
-        {/if}
-		{/each}
-	</div>
+        </article>
+      {/if}
+    {/each}
+  </div>
 </div>
