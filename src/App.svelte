@@ -47,7 +47,7 @@
 
       state.position = nodes.find(x => x.id === option.id)
       state.childs = links.filter(x => x.source == state.position.id).map(x => x.target)
-      await handleAnswer({...state.position}) //.question, state.position.questionTooltip)
+      await handleAnswer({...state.position})
 
       if (state.childs.length > 1) {
         comments = comments.concat({
@@ -62,7 +62,6 @@
     }
   }
 
-  //const handleAnswer = (reply, tooltip) => {
   const handleAnswer = (reply) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -76,7 +75,7 @@
           comments = comments.filter(comment => !comment.placeholder).concat({
             author: 'otheruser',
             text: reply.question,
-            tooltip: reply.tooltip && reply.tooltip,
+            tooltip: reply.questionTooltip ? reply.questionTooltip : false,
             id: reply.id && reply.id
           });
           resolve(comments)
@@ -392,7 +391,7 @@
 
   <div class="scrollable" bind:this={div}>
     {#each comments as comment, idx}
-        {#if comment.text}
+      {#if comment.text}
         <article class="otheruser">
           {#if editMode}
             <input bind:value="{comments[idx].text}">
