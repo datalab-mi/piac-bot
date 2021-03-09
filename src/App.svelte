@@ -43,14 +43,20 @@
   }
 
   const downloadData = (data) => {
-    const myBlob = new Blob([JSON.stringify(data)], {type: 'text/plain'});
-    // (B) CREATE DOWNLOAD LINK
-    const url = window.URL.createObjectURL(myBlob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "nodes.json";
-    anchor.click();
-    window.URL.revokeObjectURL(url);
+    fetch('/form', {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then(response => response.text())
+      .then(data => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   }
 
   const editNode = () => {
