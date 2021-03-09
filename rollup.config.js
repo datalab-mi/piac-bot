@@ -19,7 +19,8 @@ export default {
     replace({
       '__FAQ__': production ? 'faq-sample.json' : 'faq-saisis.json',
       '__COUNTRIES__': production ? 'pays-sample.json' : 'pays.json',
-      '__CONVERSATION__': production ? 'conversation-sample' : 'conversation'
+      '__NODES__': production ? 'nodes-sample' : 'nodes',
+      '__LINKS__': production ? 'links-sample' : 'links'
     }),
 		svelte({
 			// enable run-time checks when not in production

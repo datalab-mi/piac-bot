@@ -1,34 +1,78 @@
 <script>
   import NetworkGraph from './NetworkGraph.svelte';
-	import { beforeUpdate, afterUpdate } from 'svelte';
-  import { nodes, links } from './__CONVERSATION__';
+	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
   import { networkVisibility } from './stores';
 
 	let div;
 	let autoscroll;
+  let state;
   let editMode = false;
+  let nodes = [];
+  let links = [];
+  let comments = [];
 
-	beforeUpdate(() => {
-		autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
-	});
-
-	afterUpdate(() => {
-		if (autoscroll) div.scrollTo(0, div.scrollHeight)
-	});
-
-  let state = {
-    position: 0,
-    childs: []
+  const getData = async (filename) => {
+    const res = await fetch(filename)
+    if (res) {
+      return await res.json()
+    } else {
+      return []
+    }
   }
 
-  state.position = nodes.find(x => x.id === 'start').id
-  state.childs = links.filter(x => x.source == state.position).map(x => x.target)
+  const handleAnswer = (reply) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        comments = comments.concat({
+          author: 'otheruser',
+          text: '...',
+          placeholder: true
+        });
 
-	let comments = [
-		{ auth: 'chatbot', text: 'Bonjour,' },
-    { auth: 'chatbot', text: nodes.find(x => x.id === 'start').question },
-    { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0]) }
-	];
+        setTimeout(() => {
+          comments = comments.filter(comment => !comment.placeholder).concat({
+            author: 'otheruser',
+            text: reply.question,
+            tooltip: reply.questionTooltip ? reply.questionTooltip : false,
+            id: reply.id && reply.id
+          });
+          resolve(comments)
+        }, 500 + Math.random() * 500);
+      }, 200 + Math.random() * 200);
+    })
+  }
+
+  const downloadData = (data) => {
+    const myBlob = new Blob([JSON.stringify(data)], {type: 'text/plain'});
+    // (B) CREATE DOWNLOAD LINK
+    const url = window.URL.createObjectURL(myBlob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "nodes.json";
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  const editNode = () => {
+    if (editMode) {
+      comments.forEach(comment => {
+        if (comment.id) {
+          const nodeIdx = nodes.findIndex(x => x.id === comment.id)
+          nodes[nodeIdx]['question'] = comment.text
+        }
+        if (comment.options !== undefined) {
+          comment.options.forEach(option => {
+            const optionIdx = nodes.findIndex(x => x.id === comment.id)
+            if (optionIdx !== undefined &&  optionIdx >= 0) {
+              nodes[optionIdx]['text'] = option.text
+            }
+          })
+        }
+      })
+      downloadData(nodes)
+    }
+    editMode = !editMode
+  }
 
   const handleRules = async (option, idx) => {
     if (option.id) {
@@ -62,47 +106,35 @@
     }
   }
 
-  const handleAnswer = (reply) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        comments = comments.concat({
-          author: 'otheruser',
-          text: '...',
-          placeholder: true
-        });
-
-        setTimeout(() => {
-          comments = comments.filter(comment => !comment.placeholder).concat({
-            author: 'otheruser',
-            text: reply.question,
-            tooltip: reply.questionTooltip ? reply.questionTooltip : false,
-            id: reply.id && reply.id
-          });
-          resolve(comments)
-        }, 500 + Math.random() * 500);
-      }, 200 + Math.random() * 200);
-    })
-  }
-
-  const editNode = () => {
-    if (editMode) {
-      comments.forEach(comment => {
-        if (comment.id) {
-          const nodeIdx = nodes.findIndex(x => x.id === comment.id)
-          nodes[nodeIdx]['question'] = comment.text
-        }
-        if (comment.options !== undefined) {
-          comment.options.forEach(option => {
-            const optionIdx = nodes.findIndex(x => x.id === comment.id)
-            if (optionIdx !== undefined &&  optionIdx >= 0) {
-              nodes[optionIdx]['text'] = option.text
-            }
-          })
-        }
-      })
+  onMount(async () => {
+    nodes = await getData('__NODES__.json')
+    links = await getData('__LINKS__.json')
+    state = {
+      position: 0,
+      childs: []
     }
-    editMode = !editMode
-  }
+
+    state.position = nodes.find(x => x.id === 'start').id
+    state.childs = links.filter(x => x.source == state.position).map(x => x.target)
+
+    comments = [
+      { auth: 'chatbot', text: 'Bonjour,' },
+      { auth: 'chatbot', text: nodes.find(x => x.id === 'start').question },
+      { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0]) }
+    ];
+
+  })
+
+
+	beforeUpdate(() => {
+		autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
+	});
+
+	afterUpdate(() => {
+		if (autoscroll) div.scrollTo(0, div.scrollHeight)
+	});
+
+
 
 </script>
 
@@ -373,7 +405,9 @@
 
 </style>
 
-<NetworkGraph nodesInput={nodes} linksInput={links}/>
+{#if (nodes.length > 0) && (links.length > 0)}
+  <NetworkGraph nodesInput={nodes} linksInput={links}/>
+{/if}
 
 <div class="chat">
 
