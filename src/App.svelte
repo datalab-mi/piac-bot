@@ -124,8 +124,14 @@
     state.childs = links.filter(x => x.source == state.position).map(x => x.target)
 
     comments = [
-      { auth: 'chatbot', text: 'Bonjour,' },
-      { auth: 'chatbot', text: nodes.find(x => x.id === 'start').question },
+      { auth: 'chatbot', 
+        text: nodes.find(x => x.id === 'salutation').question,
+        id: nodes.find(x => x.id === 'salutation').id
+      },
+      { auth: 'chatbot', 
+        text: nodes.find(x => x.id === 'start').question,
+        id: nodes.find(x => x.id === 'start').id 
+      },
       { auth: 'chatbot', options: state.childs.map(child => nodes.filter(x => child == x.id)).map(x => x[0]) }
     ];
 
