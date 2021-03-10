@@ -22,3 +22,6 @@ stop:
 
 down:
 	$(COMPOSE) down --remove-orphans
+
+compress:
+	cd .. && tar --exclude='./piac-bot/node_modules' --exclude='./piac-bot/.git' -zcvf backup.tar.gz ./piac-bot
