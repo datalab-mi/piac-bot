@@ -15,7 +15,8 @@ app.get('/hello', (req, res) => {
 })
 
 app.post('/form', (req, res) => {
-  fs.writeFileSync('public/nodes.json', JSON.stringify(req.body));
+  fs.writeFileSync('public/nodes.json', JSON.stringify(req.body.nodes));
+  fs.writeFileSync('public/links.json', JSON.stringify(req.body.links));
   res.send('OK')
 })
 

@@ -42,13 +42,16 @@
     })
   }
 
-  const downloadData = (data) => {
+  const downloadData = (nodes, links) => {
     fetch('/form', {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+	nodes: nodes,
+	links: links
+	})
     })
       .then(response => response.text())
       .then(data => {
@@ -75,7 +78,7 @@
           })
         }
       })
-      downloadData(nodes)
+      downloadData(nodes, links)
     }
     editMode = !editMode
   }
