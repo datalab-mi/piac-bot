@@ -112,6 +112,29 @@
     }
   }
 
+  const handleNewOption = (idx) => {
+    const uniqueId = `node_${Date.now()}-${Math.round(Math.random() * 1E9)}`
+    const position = nodes.find(x => x.id === idx)
+    comments[idx].options = [...comments[idx].options, {text: "test", question: "Question ?", id: uniqueId}]
+    nodes = [...nodes, {text: "texte", question: "Question ?", id: uniqueId}]
+    links = [...links, {source: comments[idx].id, target: uniqueId}]
+  }
+
+  const createNewChild = (idx, option) => {
+    const uniqueId = `node_${Date.now()}-${Math.round(Math.random() * 1E9)}`
+    nodes = [...nodes, {text: "texte", question: "Question ?", id: uniqueId}]
+    links = [...links, {source: option.id, target: uniqueId}]
+    handleRules(option, idx)
+  }
+
+  const selectNode = (option, checked) => {
+    if (checked) {
+      state.sourceNode = option
+    } else {
+      state.sourceNode = null
+    }
+  }
+
   onMount(async () => {
     nodes = await getData('__NODES__.json')
     links = await getData('__LINKS__.json')
@@ -454,11 +477,24 @@
           <div class="buttons user">
             {#each comment.options as option}
               {#if editMode}
+                <input
+                  type=checkbox
+                  on:change={(e) => selectNode(option, e.target.checked)}
+                  >
                 <input bind:value="{option.text}">
+                <br>
+                {#if state && state.sourceNode == option}
+                  <button class="button" on:click={() => createNewChild(idx, state.sourceNode)}>+ option</button>
+                {/if}
               {:else}
                 <button class="button { option.selected === "selected" ? 'selected' : ''} {option.selected === "unselected" ? 'disabled' : ''} has-tooltip-right"  data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
               {/if}
             {/each}
+            {#if editMode}
+              &nbsp; &nbsp;
+              <button class="button" on:click={() => handleNewOption(idx)}
+                >+</button>
+            {/if}
           </div>
         </article>
       {/if}
