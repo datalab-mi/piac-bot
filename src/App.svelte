@@ -116,11 +116,11 @@
   }
 
   const handleNewOption = (idx) => {
+    const parentId = links.find(x => x.target === comments[idx].options[0].id).source
     const uniqueId = `node_${Date.now()}-${Math.round(Math.random() * 1E9)}`
-    const position = nodes.find(x => x.id === idx)
     comments[idx].options = [...comments[idx].options, {text: "test", question: "Question ?", id: uniqueId}]
     nodes = [...nodes, {text: "texte", question: "Question ?", id: uniqueId}]
-    links = [...links, {source: comments[idx].id, target: uniqueId}]
+    links = [...links, {source: parentId, target: uniqueId}]
   }
 
   const createNewChild = (idx, option) => {
