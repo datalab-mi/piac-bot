@@ -130,6 +130,15 @@
     handleRules(option, idx)
   }
 
+  const removeChild = (idx, option) => {
+    const commentIdx = comments[idx].options.findIndex(x => x.id === option.id)
+    const nodeIdx = nodes.findIndex(x => x.id === option.id)
+    const linkIdx = links.findIndex(x => x.target === option.id)
+    comments[idx].options.splice(commentIdx, 1)
+    nodes.splice(nodeIdx, 1)
+    links.splice(linkIdx, 1)
+  }
+
   const selectNode = (option, checked) => {
     if (checked) {
       state.sourceNode = option
@@ -484,10 +493,12 @@
                   type=checkbox
                   on:change={(e) => selectNode(option, e.target.checked)}
                   >
-                <input bind:value="{option.text}">
+                <input 
+                  bind:value="{option.text}">
                 <br>
                 {#if state && state.sourceNode == option}
                   <button class="button" on:click={() => createNewChild(idx, state.sourceNode)}>+ option</button>
+                  <button class="button " on:click={() => removeChild(idx, state.sourceNode)}>- supprimer</button>
                 {/if}
               {:else}
                 <button class="button { option.selected === "selected" ? 'selected' : ''} {option.selected === "unselected" ? 'disabled' : ''} has-tooltip-right"  data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
