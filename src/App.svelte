@@ -67,7 +67,9 @@
       comments.forEach(comment => {
         if (comment.id) {
           const nodeIdx = nodes.findIndex(x => x.id === comment.id)
-          nodes[nodeIdx]['question'] = comment.text
+          if (nodeIdx > -1) {
+            nodes[nodeIdx]['question'] = comment.text
+          }
         }
         if (comment.options !== undefined) {
           comment.options.forEach(option => {
