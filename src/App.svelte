@@ -90,7 +90,7 @@
         }
         if (comment.options !== undefined) {
           comment.options.forEach(option => {
-            const optionIdx = nodes.findIndex(x => x.id === comment.id)
+            const optionIdx = nodes.findIndex(x => x.id === option.id)
             if (optionIdx !== undefined &&  optionIdx >= 0) {
               nodes[optionIdx]['text'] = option.text
             }
