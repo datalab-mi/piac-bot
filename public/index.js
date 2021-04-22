@@ -20,6 +20,18 @@ app.post('/form', (req, res) => {
   res.send('OK')
 })
 
+app.get('/reset', (req, res) => {
+  fs.copyFile('public/nodesBACK.json', 'public/nodes.json', (err) => {
+      if (err) throw err;
+      console.log('backup nodes.json');
+  });
+  fs.copyFile('public/linksBACK.json', 'public/links.json', (err) => {
+      if (err) throw err;
+      console.log('backup nodes.json');
+  });
+  res.send('OK')
+})
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })

@@ -62,6 +62,25 @@
       });
   }
 
+  const resetTree = () => {
+    fetch('/reset', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+      .then(response => response.text())
+      .then(data => {
+        console.log('Success:', data);
+        document.location.reload();
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
+
+
+
   const editNode = () => {
     if (editMode) {
       comments.forEach(comment => {
@@ -469,7 +488,7 @@
 
   <h1 class="title">PIAC Bot</h1>
   <div class="navbar-end">
-    <button on:click={() => $networkVisibility = true} class="button">Graphe</button>
+    <button on:click={() => resetTree()} class="button">Reset</button>
     <button on:click={() => editNode()} class="button {editMode ? 'is-danger' : ''}">
       {#if editMode}
         Sauvegarder changements
