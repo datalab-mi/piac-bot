@@ -137,6 +137,8 @@
     comments[idx].options.splice(commentIdx, 1)
     nodes.splice(nodeIdx, 1)
     links.splice(linkIdx, 1)
+    editMode = !editMode
+    editMode = !editMode
   }
 
   const selectNode = (option, checked) => {
@@ -493,13 +495,13 @@
                   type=checkbox
                   on:change={(e) => selectNode(option, e.target.checked)}
                   >
-                <input 
-                  bind:value="{option.text}">
-                <br>
-                {#if state && state.sourceNode == option}
-                  <button class="button" on:click={() => createNewChild(idx, state.sourceNode)}>+ option</button>
-                  <button class="button " on:click={() => removeChild(idx, state.sourceNode)}>- supprimer</button>
-                {/if}
+                  <input 
+                    bind:value="{option.text}">
+                  <br>
+                  {#if state && state.sourceNode == option}
+                    <button class="button" on:click={() => createNewChild(idx, option)}>+ option</button>
+                    <button class="button " on:click={() => removeChild(idx, option)}>- supprimer</button>
+                  {/if}
               {:else}
                 <button class="button { option.selected === "selected" ? 'selected' : ''} {option.selected === "unselected" ? 'disabled' : ''} has-tooltip-right"  data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
               {/if}
