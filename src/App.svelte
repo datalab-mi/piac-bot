@@ -507,8 +507,8 @@
                     bind:value="{option.text}">
                   <br>
                   {#if state && state.sourceNode == option}
-                    <button class="button" on:click={() => createNewChild(idx, option)}>+ option</button>
-                    <button class="button " on:click={() => removeChild(idx, option)}>- supprimer</button>
+                    <button class="button selected" on:click={() => createNewChild(idx, option)}>+ option</button>
+                    <button class="button is-danger" on:click={() => removeChild(idx, option)}>- supprimer</button>
                   {/if}
                 </div>
               {:else}
