@@ -1,7 +1,5 @@
 <script>
-  import NetworkGraph from './NetworkGraph.svelte';
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
-  import { networkVisibility } from './stores';
 
 	let div;
 	let autoscroll;
@@ -479,10 +477,6 @@
   }
 
 </style>
-
-{#if (nodes.length > 0) && (links.length > 0)}
-  <NetworkGraph nodesInput={nodes} linksInput={links}/>
-{/if}
 
 <div class="chat">
 
