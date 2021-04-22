@@ -454,6 +454,11 @@
     padding-right: calc(1em + 0.25em);
   }
 
+  input[type="checkbox"] {
+    vertical-align: baseline;
+    margin-left: 0.5rem;
+  }
+
 </style>
 
 {#if (nodes.length > 0) && (links.length > 0)}
@@ -493,6 +498,7 @@
           <div class="buttons user">
             {#each comment.options as option}
               {#if editMode}
+                <div class="has-addons">
                 <input
                   type=checkbox
                   on:change={(e) => selectNode(option, e.target.checked)}
@@ -504,6 +510,7 @@
                     <button class="button" on:click={() => createNewChild(idx, option)}>+ option</button>
                     <button class="button " on:click={() => removeChild(idx, option)}>- supprimer</button>
                   {/if}
+                </div>
               {:else}
                 <button class="button { option.selected === "selected" ? 'selected' : ''} {option.selected === "unselected" ? 'disabled' : ''} has-tooltip-right"  data-tooltip="{option.tooltip ? option.tooltip : null}" on:click={handleRules(option, idx)}>{option.text}</button>
               {/if}
