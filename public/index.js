@@ -27,7 +27,7 @@ app.get('/reset', (req, res) => {
   });
   fs.copyFile('public/linksBACK.json', 'public/links.json', (err) => {
       if (err) throw err;
-      console.log('backup nodes.json');
+      console.log('backup links.json');
   });
   res.send('OK')
 })
