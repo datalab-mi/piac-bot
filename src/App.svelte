@@ -157,7 +157,9 @@
     nodes.splice(nodeIdx, 1)
     links.splice(linkIdx, 1)
     editMode = !editMode
-    editMode = !editMode
+    setTimeout(() => {
+      editMode = !editMode
+    }, 100)
   }
 
   const selectNode = (option, checked) => {
