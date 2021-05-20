@@ -19,8 +19,9 @@ export default {
     replace({
       '__FAQ__': production ? 'faq-sample.json' : 'faq-saisis.json',
       '__COUNTRIES__': production ? 'pays-sample.json' : 'pays.json',
-      '__NODES__': production ? 'nodes-sample' : 'nodes',
-      '__LINKS__': production ? 'links-sample' : 'links'
+      '__NODES__': production ? 'nodes' : 'nodes',
+      '__LINKS__': production ? 'links' : 'links',
+      '__PASSWORD__': production ? process.env.PASSWORD : 'abc'
     }),
 		svelte({
 			// enable run-time checks when not in production
