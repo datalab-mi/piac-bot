@@ -1,5 +1,7 @@
 <script>
+  import AuthModal from './AuthModal.svelte';
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte';
+  import { networkVisibility, adminButtons } from './stores';
 
 	let div;
 	let autoscroll;
@@ -480,18 +482,24 @@
 
 </style>
 
+<AuthModal />
+
 <div class="chat">
 
   <h1 class="title">PIAC Bot</h1>
   <div class="navbar-end">
-    <button on:click={() => resetTree()} class="button">Reset</button>
-    <button on:click={() => editNode()} class="button {editMode ? 'is-danger' : ''}">
-      {#if editMode}
-        Sauvegarder changements
-      {:else}
-        Éditer
-      {/if}
-    </button>
+    {#if $adminButtons}
+      <button on:click={() => resetTree()} class="button">Reset</button>
+      <button on:click={() => editNode()} class="button {editMode ? 'is-danger' : ''}">
+        {#if editMode}
+          Sauvegarder changements
+        {:else}
+          Éditer
+        {/if}
+      </button>
+    {:else}
+    <button on:click={() => $networkVisibility = !$networkVisibility} class="button">Admin</button>
+    {/if}
   </div>
 
   <div class="scrollable" bind:this={div}>
