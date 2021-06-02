@@ -527,6 +527,7 @@
                   on:change={(e) => selectNode(option, e.target.checked)}
                   >
                   <input 
+                    class="{option.selected === "selected" ? 'selected' : ''}" 
                     bind:value="{option.text}">
                   <br>
                   {#if state && state.sourceNode == option}
