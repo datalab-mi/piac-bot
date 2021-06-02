@@ -504,7 +504,7 @@
 
   <div class="scrollable" bind:this={div}>
     {#each comments as comment, idx}
-      {#if comment.text}
+      {#if comment.text !== undefined}
         <article class="otheruser">
           {#if editMode}
             <input bind:value="{comments[idx].text}">
