@@ -6,6 +6,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 
 const production = !process.env.ROLLUP_WATCH;
+const example = process.env.EXAMPLE;
 
 export default {
 	input: 'src/main.js',
@@ -19,8 +20,8 @@ export default {
     replace({
       '__FAQ__': production ? 'faq-sample.json' : 'faq-saisis.json',
       '__COUNTRIES__': production ? 'pays-sample.json' : 'pays.json',
-      '__NODES__': production ? 'nodes' : 'nodes',
-      '__LINKS__': production ? 'links' : 'links',
+      '__NODES__': production ? `nodes${example ? '-example' : ''}` : `nodes${example ? '-example' : ''}`,
+      '__LINKS__': production ? `links${example ? '-example' : ''}` : `links${example ? '-example': ''}`,
       '__PASSWORD__': production ? process.env.PASSWORD : 'abc'
     }),
 		svelte({
